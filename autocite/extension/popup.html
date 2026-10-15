@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+  <title>AutoCite</title>
+</head>
+<body>
+  <main class="card">
+    <div class="topbar">
+      <div class="brand"><span class="light">Auto</span><span class="bold">Cite</span></div>
+      <div id="account"></div>
+    </div>
+
+    <section id="login-section" hidden>
+      <p class="muted">Masuk dengan Google untuk mulai mencari sitasi.</p>
+      <button id="btn-login" class="btn filled">Masuk dengan Google</button>
+    </section>
+
+    <section id="main-section" hidden>
+      <h2>Teks Terpilih</h2>
+      <textarea id="text" rows="3" class="selected" aria-label="Teks terpilih" placeholder="Blok teks di Google Docs lalu buka ekstensi ini, atau tempel teks di sini."></textarea>
+      <button id="btn-search" class="btn filled wide">Cari Sitasi</button>
+      <p id="quota" class="muted"></p>
+      <p id="status" class="muted" role="status"></p>
+
+      <div id="results-wrap" hidden>
+        <h2>Rekomendasi Referensi</h2>
+        <ul id="results"></ul>
+      </div>
+    </section>
+
+    <footer><a href="options.html" target="_blank">Pengaturan</a></footer>
+  </main>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
