@@ -3,22 +3,57 @@
   "name": "AutoCite",
   "version": "0.3.0",
   "description": "Rekomendasi sitasi ilmiah otomatis untuk Google Docs berbasis AI dan semantic search.",
-  "permissions": ["identity", "storage", "activeTab", "scripting"],
+  "permissions": [
+    "identity",
+    "storage",
+    "activeTab",
+    "scripting",
+    "clipboardRead",
+    "clipboardWrite",
+    "sidePanel"
+  ],
   "host_permissions": [
     "https://docs.google.com/*",
     "https://api.semanticscholar.org/*",
     "https://generativelanguage.googleapis.com/*",
-    "https://www.googleapis.com/*"
+    "https://www.googleapis.com/*",
+    "https://api.openalex.org/*",
+    "https://docs.googleapis.com/*"
   ],
   "oauth2": {
-    "client_id": "GANTI_DENGAN_CLIENT_ID.apps.googleusercontent.com",
-    "scopes": ["openid", "email", "profile"]
+    "client_id": "796241063270-lghk5osog1ldcq3fj7239ufq1e1tl35m.apps.googleusercontent.com",
+    "scopes": [
+      "openid",
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/documents"
+    ]
   },
-  "background": { "service_worker": "background.js", "type": "module" },
-  "action": { "default_popup": "popup.html", "default_title": "AutoCite" },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Buka AutoCite"
+  },
   "options_page": "options.html",
   "content_scripts": [
-    { "matches": ["https://docs.google.com/document/*"], "js": ["content.js"] }
+    {
+      "matches": [
+        "https://docs.google.com/document/*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
   ],
-  "icons": { "16": "icons/icon16.png", "48": "icons/icon48.png", "128": "icons/icon128.png" }
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgoxgZ1kE/CKD4dTE2CJR0pzHAQ3bFGzbgNPHgZyJbjvCJwVA6Ws/r0p5RM9SfwjiT+FeKgNit/4eHxgqHjoyTMgz0CGQxaUmceBnc2dkXTLSZ5+84zKB40askIgYBJU2K+ae9UeATubmzQnZVLsFur+YCL2TONXfUtSmPgtZKEYx9USNQv7cW/BabO2fwXvYe+noQNLbZnHUaD8GIGJy2/wmwz5EKefc3AxGlFQIMkJ/Sl21Z5woK5JgD47DizKi923crJxHrmdRspQmfAJ00C9yWSP/RqNerTlSORJ7YosXIZ/kroMY0N9rgg2czFLoxTJxDFpX80K2MwtsJbD3pQIDAQAB",
+  "side_panel": {
+    "default_path": "popup.html"
+  }
 }

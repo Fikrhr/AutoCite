@@ -1,10 +1,14 @@
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8"><title>Pengaturan AutoCite</title>
-<style>body{font-family:system-ui,sans-serif;max-width:480px;margin:32px auto;padding:0 16px}input{width:100%;padding:8px;margin:8px 0}button{padding:8px 14px}</style></head>
+<style>body{font-family:system-ui,sans-serif;max-width:480px;margin:32px auto;padding:0 16px}input{width:100%;padding:8px;margin:6px 0 4px;box-sizing:border-box}small{color:#64748B;display:block;margin-bottom:16px}button{padding:8px 14px}</style></head>
 <body>
 <h1>Pengaturan AutoCite</h1>
-<label for="key">Gemini API key (gratis dari Google AI Studio)</label>
-<input id="key" type="password" placeholder="Opsional. Tanpa key, teks dipakai langsung sebagai kueri.">
+<label for="key">Gemini API key</label>
+<input id="key" type="password" placeholder="Opsional">
+<small>Gratis dari aistudio.google.com. Dipakai untuk mengubah teks menjadi kueri pencarian yang tajam. Tanpa key, teks dipakai apa adanya.</small>
+<label for="s2">Semantic Scholar API key</label>
+<input id="s2" type="password" placeholder="Opsional, mengurangi error 429">
+<small>Gratis lewat semanticscholar.org/product/api. Tanpa key, pencarian sering dibatasi (429).</small>
 <button id="save">Simpan</button> <span id="msg"></span>
 <script src="options.js"></script>
 </body></html>

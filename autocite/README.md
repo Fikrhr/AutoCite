@@ -10,12 +10,12 @@ Blok teks yang butuh sumber, AutoCite mengekstrak klaim utamanya dengan LLM, men
 |---|---|
 | UC-01 Login dengan Google | Selesai (perlu OAuth Client ID) |
 | UC-02 Pilih teks di Google Docs | Sebagian (ambil seleksi otomatis jika tersedia, fallback tempel teks) |
-| UC-03 Cari sitasi (LLM + Semantic Scholar) | Selesai |
+| UC-03 Cari sumber referensi (LLM + Semantic Scholar) | Selesai |
 | UC-04 Lihat rekomendasi referensi | Selesai |
-| UC-05 Sisipkan sitasi ke dokumen | Sebagian (salin ke clipboard, belum insert via Docs API) |
+| UC-05 Sisipkan sitasi ke dokumen | Selesai (insert via Google Docs API, cadangan: salin ke clipboard) |
 | Kuota harian akun Free | Selesai (10 pencarian/hari) |
 | UC-06 Pilih format sitasi (premium) | Belum |
-| UC-07 Daftar pustaka otomatis | Belum (baru per referensi) |
+| UC-07 Daftar pustaka otomatis | Sebagian (tombol Salin Daftar Pustaka per entri; belum ada daftar otomatis di dokumen) |
 | UC-08 Riwayat pencarian | Belum |
 | UC-09 Preferensi sitasi | Belum |
 | UC-10 Upgrade premium + pembayaran | Belum |
