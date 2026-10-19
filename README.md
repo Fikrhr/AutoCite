@@ -37,4 +37,21 @@ Ekstensi berjalan tanpa API key. Key berikut bisa diisi lewat Pengaturan di pane
 - Semantic Scholar API key: mengurangi pembatasan permintaan. Tanpa key, pencarian lebih sering beralih ke OpenAlex (label "sumber" di hasil menunjukkan mana yang dipakai).
 
 ## Setup pengembang (hanya jika membuat Client ID sendiri)
-1. Di Google Cloud Console, buat OAuth Client ID tipe Chrome Extension dengan Item ID sama
+1. Di Google Cloud Console, buat OAuth Client ID tipe Chrome Extension dengan Item ID sama dengan ID ekstensi, lalu isi `oauth2.client_id` di `extension/manifest.json`.
+2. Aktifkan Google Docs API.
+3. Tambahkan scope `https://www.googleapis.com/auth/documents` di Data Access.
+4. Daftarkan akun penguji di Audience (Test users).
+
+## Struktur
+```
+extension/   kode ekstensi (manifest, background, panel, lib)
+docs/        SRS, SDD, diagram, daftar issue
+```
+
+## Batasan saat ini
+- Google Docs merender teks di canvas, sehingga pembacaan seleksi memakai cara cadangan dan belum stabil di semua kondisi.
+- Kecocokan paper dengan kalimat hanya perkiraan dari judul dan abstrak; pengguna perlu memverifikasi sumber sebelum mengutip.
+- Penyisipan sitasi membutuhkan akun yang punya akses edit ke dokumen.
+
+## Lisensi
+MIT
