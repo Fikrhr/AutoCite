@@ -1,4 +1,6 @@
 // Panel samping AutoCite. Keadaan terakhir (teks, hasil, pesan) disimpan, jadi tetap ada saat popup dibuka lagi.
+import { FORMATS, formatReference, formatInText } from "./lib/formats.js";
+import { isPremium } from "./lib/plan.js";
 const $ = (id) => document.getElementById(id);
 const send = (msg) => chrome.runtime.sendMessage(msg);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -6,6 +8,8 @@ const STATE_KEY = "panelState";
 
 let searchedText = ""; // teks yang dipakai pada pencarian terakhir
 let lastResults = [];  // hasil pencarian terakhir (untuk dipulihkan)
+let fmt = "apa";       // format sitasi aktif (UC-06)
+let premium = false;
 
 // ---------- Penyimpanan keadaan ----------
 async function saveState() {
@@ -29,7 +33,7 @@ async function restoreState() {
 
 function showResults(list) {
   $("results").innerHTML = "";
-  list.forEach((r) => $("results").appendChild(card(r)));
+  list.forEach((r, i) => $("results").appendChild(card(r, i)));
   $("results-wrap").hidden = !list.length;
 }
 
@@ -38,7 +42,8 @@ async function init() {
   const { user } = await chrome.storage.local.get("user");
   render(user);
   if (!user) return;
-  const hadText = await restoreState();
+  const [hadText] = await Promise.all([restoreState(), loadPrefs(), renderHistory()]);
+  showResults(lastResults); // tampilkan ulang dengan format pilihan
   const { searching, searchResult, insertResult } = await chrome.storage.local.get(["searching", "searchResult", "insertResult"]);
   if (searching) $("status").textContent = "Mencari referensi... (hasil akan muncul otomatis)";
   else if (searchResult) applySearchResult(searchResult);
@@ -51,14 +56,21 @@ function render(user) {
   $("main-section").hidden = !user;
   $("account").innerHTML = user ? `<span>${esc(user.email)}</span> <button id="btn-logout" class="btn outline small">Keluar</button>` : "";
   if (user) {
-    $("btn-logout").onclick = async () => { await send({ type: "LOGOUT" }); render(null); };
+    $("btn-logout").onclick = async () => {
+      await send({ type: "LOGOUT" });
+      lastResults = []; searchedText = ""; $("text").value = ""; $("status").textContent = "";
+      showResults([]); renderHistory();
+      render(null);
+    };
     refreshQuota();
   }
 }
 
 async function refreshQuota() {
   const q = await send({ type: "QUOTA" });
-  $("quota").textContent = `Kuota hari ini: ${q.limit - q.used} dari ${q.limit} pencarian tersisa (akun Free).`;
+  $("quota").textContent = q.premium
+    ? "Mode Premium (pengembangan): pencarian tanpa batas, semua format terbuka."
+    : `Kuota hari ini: ${q.limit - q.used} dari ${q.limit} pencarian tersisa (akun Free).`;
 }
 
 // ---------- Mengambil teks yang dipilih di Docs ----------
@@ -117,9 +129,14 @@ function setText(text, msg) {
 
 // ---------- Aksi ----------
 $("btn-login").onclick = async () => {
-  const res = await send({ type: "LOGIN" });
-  if (res.error) { alert(res.error); return; }
+  const btn = $("btn-login");
+  btn.disabled = true; btn.textContent = "Memproses login...";
+  let res;
+  try { res = await send({ type: "LOGIN" }); } catch (e) { res = { error: String(e.message || e) }; }
+  btn.disabled = false; btn.textContent = "Masuk dengan Google";
+  if (!res || res.error) { alert(res?.error || "Login gagal. Coba lagi."); return; }
   render(res.user);
+  loadPrefs(); renderHistory(); // format & riwayat langsung siap setelah login
   grabSelection(true);
 };
 
@@ -134,8 +151,8 @@ function applySearchResult(sr) {
   if (sr.text) searchedText = sr.text;
   if (sr.error) { $("status").textContent = sr.error; saveState(); return; }
   const list = sr.results || [];
-  const note = (sr.source === "OpenAlex" ? " [sumber: OpenAlex]" : "") + (sr.llmError ? ` (${sr.llmError})` : "");
-  $("status").textContent = (list.length ? `Kueri: "${sr.query}"` : `Tidak ada referensi untuk kueri "${sr.query}". Coba teks lain atau lebih umum.`) + note;
+  const note = (sr.source ? ` [sumber: ${sr.source}]` : "") + (sr.llmError ? ` (${sr.llmError})` : "");
+  $("status").textContent = (list.length ? `Kueri: "${sr.query}"` : `Tidak ada referensi untuk kueri "${sr.query}". Coba teks lain atau lebih umum.` + (sr.notes?.length ? ` Penyebab: ${sr.notes.join("; ")}.` : "")) + note;
   lastResults = list;
   showResults(lastResults);
   refreshQuota();
@@ -165,6 +182,8 @@ async function applyInsertResult(res) {
 chrome.storage.onChanged.addListener((ch) => {
   if (ch.searchResult?.newValue) applySearchResult(ch.searchResult.newValue);
   if (ch.insertResult?.newValue) applyInsertResult(ch.insertResult.newValue);
+  if (ch.history) renderHistory();
+  if (ch.plan || ch.prefs) loadPrefs().then(() => showResults(lastResults));
 });
 
 $("btn-search").onclick = async () => {
@@ -180,7 +199,64 @@ $("btn-search").onclick = async () => {
   applySearchResult(searchResult && searchResult.text === text ? searchResult : { ...res, text, ts: Date.now() });
 };
 
-function card(r) {
+// ---------- Format sitasi (UC-06) dan preferensi (UC-09) ----------
+async function loadPrefs() {
+  premium = await isPremium();
+  const { prefs } = await chrome.storage.local.get("prefs");
+  fmt = prefs?.format && FORMATS[prefs.format] ? prefs.format : "apa";
+  if (!premium && fmt !== "apa") fmt = "apa";
+  const sel = $("format");
+  sel.innerHTML = Object.entries(FORMATS)
+    .map(([k, v]) => `<option value="${k}"${!premium && k !== "apa" ? " disabled" : ""}>${v}${!premium && k !== "apa" ? " (Premium)" : ""}</option>`)
+    .join("");
+  sel.value = fmt;
+  sel.onchange = async () => {
+    fmt = sel.value;
+    const { prefs: p } = await chrome.storage.local.get("prefs");
+    await chrome.storage.local.set({ prefs: { ...(p || {}), format: fmt } });
+    showResults(lastResults);
+  };
+}
+
+// ---------- Riwayat pencarian (UC-08) ----------
+async function renderHistory() {
+  const { history = [] } = await chrome.storage.local.get("history");
+  const ul = $("history");
+  ul.innerHTML = "";
+  $("history-wrap").hidden = !history.length;
+  history.forEach((h) => {
+    const li = document.createElement("li");
+    const open = document.createElement("button");
+    open.className = "open";
+    open.textContent = short(h.text, 10);
+    const when = document.createElement("small");
+    when.textContent = `${new Date(h.ts).toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short" })} · ${h.results.length} referensi`;
+    open.appendChild(when);
+    open.onclick = () => {
+      $("text").value = h.text;
+      searchedText = h.text;
+      lastResults = h.results;
+      $("status").textContent = `Dari riwayat, kueri "${h.query}" (tidak memakai kuota).`;
+      showResults(lastResults);
+      saveState();
+    };
+    const del = document.createElement("button");
+    del.className = "del";
+    del.textContent = "×";
+    del.title = "Hapus dari riwayat";
+    del.setAttribute("aria-label", "Hapus dari riwayat");
+    del.onclick = async () => {
+      const { history: cur = [] } = await chrome.storage.local.get("history");
+      await chrome.storage.local.set({ history: cur.filter((x) => x.ts !== h.ts) });
+    };
+    li.append(open, del);
+    ul.appendChild(li);
+  });
+}
+
+$("btn-clear-history").onclick = () => chrome.storage.local.set({ history: [] });
+
+function card(r, i) {
   const li = document.createElement("li");
   li.innerHTML = `<div class="t">${esc(r.title)}</div>
     <div class="m">${esc(r.authors[0] ?? "Anonim")}${r.authors.length > 1 ? " et al." : ""} ${r.year ?? "n.d."}</div>
@@ -190,9 +266,9 @@ function card(r) {
   li.querySelector('[data-k="in"]').onclick = () => {
     const sel = li.querySelector('[data-k="pos"]');
     const idx = sel ? Number(sel.value) : 0;
-    insertIntoDoc(r.inText, r.sentences?.[idx] || searchedText, idx + 1);
+    insertIntoDoc(formatInText(r, fmt, i + 1), r.sentences?.[idx] || searchedText, idx + 1);
   };
-  li.querySelector('[data-k="ref"]').onclick = () => copy(r.reference);
+  li.querySelector('[data-k="ref"]').onclick = () => copy(formatReference(r, fmt, i + 1));
   li.querySelector('[data-k="open"]').onclick = () => { if (r.url) chrome.tabs.create({ url: r.url }); };
   return li;
 }
@@ -212,7 +288,7 @@ async function copy(text) {
   $("status").textContent = "Disalin. Tempel (Ctrl+V) di bagian Daftar Pustaka.";
 }
 
-function short(s) { const w = String(s).split(/\s+/); return w.slice(0, 6).join(" ") + (w.length > 6 ? "…" : ""); }
+function short(s, n = 6) { const w = String(s).split(/\s+/); return w.slice(0, n).join(" ") + (w.length > n ? "…" : ""); }
 
 function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 

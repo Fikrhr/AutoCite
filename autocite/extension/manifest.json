@@ -18,6 +18,9 @@
     "https://generativelanguage.googleapis.com/*",
     "https://www.googleapis.com/*",
     "https://api.openalex.org/*",
+    "https://api.mymemory.translated.net/*",
+    "https://api.crossref.org/*",
+    "https://oauth2.googleapis.com/*",
     "https://docs.googleapis.com/*"
   ],
   "oauth2": {

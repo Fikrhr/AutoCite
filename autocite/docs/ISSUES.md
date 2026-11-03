@@ -12,11 +12,20 @@ Label yang disarankan: `30%` (dikerjakan sekarang), `ditunda` (sisa 70%), `fitur
 7. **feat: kuota harian akun Free**: batas 10 pencarian per hari.
 8. **docs: README, SRS, SDD ke folder docs/**
 
-## Label ditunda (70%)
-9. Sisipkan sitasi langsung ke dokumen via Google Docs API (UC-05 penuh)
-10. Pilih format sitasi APA/MLA/Chicago/IEEE dengan Citation.js (UC-06, premium)
-11. Daftar pustaka otomatis di akhir dokumen (UC-07)
-12. Riwayat pencarian (UC-08)
-13. Kelola preferensi sitasi (UC-09)
-14. Backend, Midtrans/Xendit, dan sinkronisasi status premium (UC-10)
-15. Website promosi dan checkout
+## Label 50% (dikerjakan pada tahap ini)
+9. **feat: sisipkan sitasi ke dokumen via Google Docs API (UC-05)**: sitasi muncul setelah kalimat yang dipilih pengguna. Status: selesai, sudah diuji.
+10. **feat: pilih format sitasi APA, MLA, IEEE, Harvard (UC-06)**: dropdown di panel, `lib/formats.js`; semua format terbuka selama mode pengembangan.
+11. **feat: riwayat pencarian (UC-08)**: 20 pencarian terakhir, buka ulang tanpa memakai kuota, hapus satu atau semua.
+12. **feat: preferensi sitasi (UC-09)**: format bawaan dan jumlah referensi per pencarian di halaman Pengaturan.
+
+13. **fix: pencarian lambat dan sering kosong**: Semantic Scholar dan OpenAlex dicari paralel, kueri bertingkat, batas waktu 7 detik, terjemahan kata kunci ID ke EN, kuota tidak terpotong bila hasil kosong.
+14. **fix: sitasi tidak lagi meminta login berulang**: token tersimpan dipakai ulang, token hanya dibuang saat 401; error 403 (tanpa akses edit) tidak lagi membuang token.
+15. **fix: OpenAlex wajib API key sejak Feb 2026**: tambah kolom key, sumber Crossref tanpa key, pesan penyebab saat hasil kosong.
+16. **chore: buka semua fitur Premium selama pengembangan** (`DEV_UNLOCK_ALL`).
+
+## Label ditunda
+17. Daftar pustaka otomatis di akhir dokumen (UC-07 penuh)
+18. Backend, Midtrans/Xendit, dan sinkronisasi status premium (UC-10)
+19. Website promosi dan checkout
+20. Penomoran IEEE otomatis lintas pencarian
+21. **fix: logout benar-benar keluar**: token dicabut di Google dan semua cache dibersihkan; hasil dan riwayat akun lama dihapus.

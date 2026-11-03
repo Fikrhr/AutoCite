@@ -1,11 +1,17 @@
-chrome.storage.local.get(["geminiKey", "s2Key"]).then(({ geminiKey, s2Key }) => {
-  document.getElementById("key").value = geminiKey || "";
-  document.getElementById("s2").value = s2Key || "";
+const $ = (id) => document.getElementById(id);
+chrome.storage.local.get(["geminiKey", "s2Key", "oaKey", "prefs"]).then(({ geminiKey, s2Key, oaKey, prefs }) => {
+  $("key").value = geminiKey || "";
+  $("s2").value = s2Key || "";
+  $("oa").value = oaKey || "";
+  $("format").value = prefs?.format || "apa";
+  $("count").value = String(prefs?.count || 5);
 });
-document.getElementById("save").onclick = async () => {
+$("save").onclick = async () => {
   await chrome.storage.local.set({
-    geminiKey: document.getElementById("key").value.trim(),
-    s2Key: document.getElementById("s2").value.trim(),
+    geminiKey: $("key").value.trim(),
+    s2Key: $("s2").value.trim(),
+    oaKey: $("oa").value.trim(),
+    prefs: { format: $("format").value, count: Number($("count").value) },
   });
-  document.getElementById("msg").textContent = "Tersimpan.";
+  $("msg").textContent = "Tersimpan.";
 };

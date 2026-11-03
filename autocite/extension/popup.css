@@ -30,3 +30,13 @@ footer{margin-top:6px;font-size:11px}footer a{color:var(--gray)}
 .pos{display:block;font-size:12px;color:var(--gray);margin:0 0 10px}
 .pos select{display:block;width:100%;margin-top:4px;padding:6px 8px;font:inherit;font-size:12px;color:#000;border:1px solid #CBD5E1;border-radius:6px;background:#fff}
 .actions.second{margin-top:8px;align-items:center}
+
+.fmt{margin-bottom:12px}
+#history-wrap{margin-top:16px;font-size:13px}
+#history-wrap summary{cursor:pointer;color:var(--gray);text-transform:uppercase;font-size:14px;margin-bottom:10px}
+#history li{display:flex;gap:6px;align-items:stretch;padding:0;border-color:#CBD5E1;overflow:hidden}
+#history .open{flex:1;text-align:left;background:#fff;border:0;padding:8px 10px;font:inherit;font-size:12px;cursor:pointer;color:#000}
+#history .open:hover{background:#FBEFEF}
+#history .open small{display:block;color:var(--gray);margin-top:2px}
+#history .del{border:0;border-left:1px solid #CBD5E1;background:#fff;color:var(--gray);cursor:pointer;padding:0 10px;font-size:16px}
+#history .del:hover{color:var(--maroon-dark);background:#FBEFEF}
